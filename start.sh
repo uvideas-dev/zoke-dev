@@ -1,8 +1,8 @@
 #!/bin/bash
-# Production start script for Render
+set -e
 
-# Run migrations if necessary (optional, depending on your setup)
-# python -m app.db.init_db 
+echo "🚀 Starting ZoKe Backend..."
+ls -R app | head -n 20 # Debug: Show directory structure
 
 # Start FastAPI using uvicorn
 exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
