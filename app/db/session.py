@@ -7,6 +7,12 @@ from app.db.base import Base
 from app.core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
+# Stealth fix: Ensure asyncpg driver is used even if user provides standard postgres:// URL
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 # Enable pooling and disable echo for production stability
 IS_PROD = os.getenv("RENDER") is not None
 engine = create_async_engine(
