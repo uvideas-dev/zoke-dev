@@ -23,26 +23,38 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     print("🚀 App starting up...")
-    
-    # 1. DB connection check
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    db_ok = await check_db_connection()
-    if db_ok:
-        print("✅ Database: Connected")
-    else:
-        print("❌ Database: Connection FAILED")
+    try:
+        # 1. DB connection check and migration
+        print("🔍 Checking database connection...")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        db_ok = await check_db_connection()
+        if db_ok:
+            print("✅ Database: Connected")
+        else:
+            print("❌ Database: Connection FAILED")
 
-    # 2. Redis connection check (Mock fallback is built-in)
-    redis_ok = await check_redis_connection()
-    if redis_ok:
-        print("✅ Redis: Connected")
-    else:
-        print("⚠️ Redis: Using in-memory fallback")
-    
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(fetch_and_store_jokes, "cron", hour=0, minute=0)
-    scheduler.start()
+        # 2. Redis connection check
+        print("🔍 Checking Redis connection...")
+        redis_ok = await check_redis_connection()
+        if redis_ok:
+            print("✅ Redis: Connected")
+        else:
+            print("⚠️ Redis: Using in-memory fallback")
+        
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(fetch_and_store_jokes, "cron", hour=0, minute=0)
+        scheduler.start()
+        print("✅ Scheduler: Started")
+        
+    except Exception as e:
+        print(f"🔥 FATAL STARTUP ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Optionally don't re-raise if you want the app to stay up for debugging /health
+        # but Render won't mark it healthy anyway.
+        raise e
 
 # Health check endpoint for Render
 @app.get("/health")
