@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+psycopg2-binary
+pydantic
+pydantic-settings
+python-dotenv
+redis
+firebase-admin
+httpx
+apscheduler
+python-multipart
+email-validator
+requests
+greenlet
+gunicorn
