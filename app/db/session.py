@@ -20,7 +20,9 @@ engine = create_async_engine(
     echo=not IS_PROD,
     pool_size=10,
     max_overflow=20,
-    pool_pre_ping=True
+    pool_pre_ping=True,
+    # Fix for PgBouncer/Supabase: Disable prepared statement cache
+    connect_args={"prepared_statement_cache_size": 0}
 )
 
 AsyncSessionLocal = sessionmaker(
